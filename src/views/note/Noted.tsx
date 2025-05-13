@@ -5,13 +5,21 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconBut
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
+interface NoteData {
+    id?: string
+    title?: string
+    note?: string
+    status?: string
+    createdAt?: string
+    updatedAt?: string 
+}
 
 const Noted = () => {
     const theme = useTheme();
 
     const [openDialog, setOpenDialog] = useState(false);
-    const [selectedNote, setSelectedNote] = useState<any>(null);
-    const [notesData, setNotesData] = useState<any[]>([]);
+    const [selectedNote, setSelectedNote] = useState<NoteData | null>(null);
+    const [notesData, setNotesData] = useState<NoteData[]>([]);
 
     const API_URL = 'http://localhost:5025/api/notes'; 
 
@@ -28,15 +36,15 @@ const Noted = () => {
         }
     };
 
-    const handleEditClick = (note: any) => {
+    const handleEditClick = (note: NoteData) => {
         setSelectedNote(note);
         setOpenDialog(true);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id?: string) => {
         try {
             await axios.delete(`${API_URL}/${id}`);
-            fetchNotes(); // refresh list
+            fetchNotes(); 
         } catch (err) {
             console.error("Delete failed", err);
         }
@@ -57,7 +65,7 @@ const Noted = () => {
 
     const handleUpdate = async () => {
         try {
-            if (selectedNote.id) {
+            if (selectedNote?.id) {
                 // Update existing note
                 await axios.put(`${API_URL}/${selectedNote.id}`, selectedNote);
             } else {
@@ -116,13 +124,13 @@ const Noted = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {notesData.map((note) => (
-                                <TableRow key={note.id}>
+                            {notesData.map((note, index) => (
+                                <TableRow key={index}>
                                     <TableCell>{note.title}</TableCell>
                                     <TableCell>{note.note}</TableCell>
                                     <TableCell>{note.status}</TableCell>
-                                    <TableCell>{new Date(note.createdAt).toLocaleString()}</TableCell>
-                                    <TableCell>{new Date(note.updatedAt).toLocaleString()}</TableCell>
+                                    <TableCell>{new Date(note.createdAt || "").toLocaleString()}</TableCell>
+                                    <TableCell>{new Date(note.updatedAt || "").toLocaleString()}</TableCell>
                                     <TableCell align="center">
                                         <IconButton color="primary" onClick={() => handleEditClick(note)}>
                                             <EditIcon />
